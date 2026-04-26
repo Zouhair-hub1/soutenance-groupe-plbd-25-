@@ -22,7 +22,6 @@ FRAME_W = 640
 FRAME_H = 480
 REAL_W_CM = 23.0
 REAL_H_CM = 17.0
-ROBOT_SPEED_CM_S = 10  # 10 cm par seconde
 
 def pixels_to_cm(px, py):
     cx_cm = round((px / FRAME_W) * REAL_W_CM, 1)
@@ -31,8 +30,6 @@ def pixels_to_cm(px, py):
 
 current_frame = None
 detections_list = []
-robot_path = []
-robot_start_time = None
 compteur = 1
 derniere_detection = 0
 frame_lock = threading.Lock()
@@ -42,7 +39,7 @@ model = YOLO(MODEL_PATH)
 print("Modele charge !")
 
 def recevoir_frames():
-    global current_frame, detections_list, compteur, derniere_detection, robot_start_time
+    global current_frame, detections_list, compteur, derniere_detection
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -52,7 +49,6 @@ def recevoir_frames():
 
     conn, addr = server.accept()
     print(f"Robot connecte : {addr}")
-    robot_start_time = time.time()
 
     while True:
         try:
@@ -86,6 +82,9 @@ def recevoir_frames():
                 coords = []
                 for box in boxes:
                     x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    box_area = (x2-x1) * (y2-y1)
+                    if box_area > FRAME_W * FRAME_H * 0.7:
+                        continue
                     px = int((x1 + x2) / 2)
                     py = int((y1 + y2) / 2)
                     cx_cm, cy_cm = pixels_to_cm(px, py)
@@ -96,17 +95,26 @@ def recevoir_frames():
                         'conf': round(conf * 100)
                     })
 
-                # Screenshot zones rouges
+                if not coords:
+                    conn.sendall(b'0')
+                    continue
+
                 screenshot_frame = frame.copy()
                 overlay = screenshot_frame.copy()
                 for box in boxes:
                     x1, y1, x2, y2 = box.xyxy[0].tolist()
                     x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
+                    box_area = (x2-x1)*(y2-y1)
+                    if box_area > FRAME_W * FRAME_H * 0.7:
+                        continue
                     cv2.rectangle(overlay, (x1,y1), (x2,y2), (0,0,255), -1)
                 cv2.addWeighted(overlay, 0.4, screenshot_frame, 0.6, 0, screenshot_frame)
                 for box in boxes:
                     x1, y1, x2, y2 = box.xyxy[0].tolist()
                     x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
+                    box_area = (x2-x1)*(y2-y1)
+                    if box_area > FRAME_W * FRAME_H * 0.7:
+                        continue
                     conf = float(box.conf[0])
                     cv2.rectangle(screenshot_frame, (x1,y1), (x2,y2), (0,0,255), 3)
                     cv2.putText(screenshot_frame,
@@ -166,18 +174,6 @@ def video_feed():
 @app.route('/detections')
 def get_detections():
     return jsonify(detections_list)
-
-@app.route('/robot_path')
-def get_robot_path():
-    global robot_path, robot_start_time
-    if robot_start_time is None:
-        return jsonify([])
-    elapsed = time.time() - robot_start_time
-    current_y = round(elapsed * ROBOT_SPEED_CM_S, 1)
-    robot_path.append({'x': 11.5, 'y': current_y})
-    if len(robot_path) > 300:
-        robot_path.pop(0)
-    return jsonify(robot_path)
 
 @app.route('/screenshot/<nom>')
 def screenshot(nom):
