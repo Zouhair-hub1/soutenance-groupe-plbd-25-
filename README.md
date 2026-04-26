@@ -1,4 +1,4 @@
-# 🌿 Robot de Détection de Mauvaises Herbes — PLBD S6
+# 🌿 Robot de Détection de Mauvaises Herbes — PLBD 25
 
 > Détection automatique de mauvaises herbes par robot mobile via vision artificielle (YOLOv8) et communication WiFi temps réel.
 
@@ -115,7 +115,7 @@ X_cm = (pixel_x / 640) × 23.0
 Y_cm = (pixel_y / 480) × 17.0
 ---
 
-## 👥 Équipe — PLBD 25 
+## 👥 Équipe — PLBD_25_
 
 ---
-
+  
