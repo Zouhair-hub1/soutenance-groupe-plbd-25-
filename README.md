@@ -1,6 +1,16 @@
 # 🌿 Robot de Détection de Mauvaises Herbes — PLBD_25_
 
-> Détection automatique de mauvaises herbes par robot mobile via vision artificielle YOLOv8 et communication WiFi temps réel.
+> Projet de fin d'études — Détection automatique de mauvaises herbes par robot mobile via vision artificielle YOLOv8 et communication WiFi temps réel.
+
+---
+
+## 🤖 Notre Robot
+
+<p align="center">
+  <img src="robot_photo.jpg" width="500"/>
+  <br/>
+  <b>Adeept PiCar Pro V2 — Robot de détection de mauvaises herbes</b>
+</p>
 
 ---
 
@@ -23,8 +33,6 @@
 ---
 
 ## 🏗️ Architecture du Système
-
-![Architecture](https://mermaid.ink/img/pako:eNptkU1PwzAMhv9KlBOI9Q-kExIcgAMHJMQBcQhp2kVL05SmGmPaf8dpB2MCTrGfx6-dOEdRekQhxNHiS4U7uEMHR4uHPTxBqV3JZ9jCM5TaVXxGLbxCqV3DZ9LCG5TaNXxiLbxDqV3HZ9bCO5TadfwlW_iAUruBz6yFDyi1G_jMWviEUruJz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviAUruJz6yFDyi1G_jMWviEUruJz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWviEUruZz6yFDyi1m_jMWvg)
 
 ```
 Raspberry Pi (Robot)          WiFi TCP:9999          PC Windows (Serveur)
@@ -64,7 +72,24 @@ Raspberry Pi (Robot)          WiFi TCP:9999          PC Windows (Serveur)
 
 ---
 
-## 🧠 Modèle YOLOv8
+## 🧠 Pourquoi YOLOv8 ?
+
+Nous avons choisi **YOLOv8** après comparaison avec YOLOv11 :
+
+| Critère | YOLOv8 ✅ | YOLOv11 ⚠️ |
+|---------|-----------|------------|
+| **Stabilité** | Très stable et mature | Très récent, moins testé |
+| **Documentation** | Complète, beaucoup d'exemples | Documentation limitée |
+| **Communauté** | Grande communauté active | Petite communauté |
+| **Support CPU** | Très optimisé | Moins optimisé CPU |
+| **Compatibilité Pi** | Compatible Raspberry Pi | Problèmes hardware limité |
+| **Roboflow** | Support natif complet | Support partiel |
+
+**Conclusion** : Pour un projet embarqué sur Raspberry Pi sans GPU, YOLOv8 est le meilleur choix en termes de stabilité, performance et compatibilité.
+
+---
+
+## 📊 Résultats d'Entraînement
 
 | Paramètre | Valeur |
 |-----------|--------|
@@ -74,6 +99,7 @@ Raspberry Pi (Robot)          WiFi TCP:9999          PC Windows (Serveur)
 | **Image size** | 640×640 |
 | **Confiance** | 0.5 |
 | **Classe** | Weeds |
+| **mAP50** | 0.0306 |
 
 ---
 
@@ -142,5 +168,54 @@ La caméra est positionnée à 20 cm du sol.
 
 ---
 
+## 🔮 Prochaines Étapes — Améliorations Futures
+
+### 1. 🧠 Partie Intelligence Artificielle
+
+- **Tester YOLOv11** — Comparer les performances avec YOLOv8 sur notre dataset une fois la version stabilisée
+- **Augmenter le dataset** — Collecter plus d'images pour améliorer la précision
+- **Intégrer best.pt dans le Raspberry Pi** — Rendre le robot totalement autonome sans dépendre du PC
+
+```bash
+# Transfert du modèle vers Raspberry Pi
+scp best.pt kit9@172.22.3.11:/home/kit9/best.pt
+```
+
+### 2. 🤖 Partie Robotique
+
+#### a) Nouveaux Composants
+
+| Composant | Utilité |
+|-----------|---------|
+| **Nouvelle caméra HD** | Meilleure qualité pour détection plus précise |
+| **Capteur d'humidité** | Détecter les zones humides pour adapter le traitement |
+| **GPS intégré** | Localiser précisément les zones infestées |
+
+#### b) Tests de Mouvement et d'Action
+
+- Résoudre le problème des **moteurs** pour déplacement autonome
+- Tester le **mouvement des dents du bras** pour arracher les mauvaises herbes depuis leur **centre de masse** détecté par YOLOv8
+- Calibrer la **vitesse de déplacement** pour une couverture optimale du terrain
+
+```
+Scénario cible :
+Robot détecte mauvaise herbe → calcule centre de masse X,Y
+→ se déplace vers X,Y → dents s'ouvrent → arrachage → continue
+```
+
+#### c) Intégration du Modèle dans le Raspberry Pi
+
+Objectif : rendre le robot **totalement autonome** sans PC.
+
+| | Situation actuelle | Objectif futur |
+|--|-------------------|----------------|
+| **Analyse** | Sur PC via WiFi | Sur Raspberry Pi en local |
+| **Autonomie** | Besoin du PC | Robot indépendant |
+| **Vitesse** | Latence WiFi | Temps réel local |
+
+---
+
 ## 👥 Équipe — Soutenance PLBD_25_
+
+---
 
